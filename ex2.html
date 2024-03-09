@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciamento de Funcionários</title>
+</head>
+<body>
+
+<form id="employee-form">
+  <label for="name">Nome:</label>
+  <input type="text" id="name" required><br>
+  <label for="age">Idade:</label>
+  <input type="number" id="age" required><br>
+  <label for="position">Cargo:</label>
+  <select id="position" required>
+    <option value="Gerente">Gerente</option>
+    <option value="Desenvolvedor">Desenvolvedor</option>
+  </select><br>
+  <div id="department-field" style="display: none;">
+    <label for="department">Departamento:</label>
+    <input type="text" id="department">
+  </div>
+  <div id="language-field" style="display: none;">
+    <label for="programming-language">Linguagem de Programação:</label>
+    <input type="text" id="programming-language">
+  </div>
+  <button type="submit">Enviar</button>
+</form>
+
+<div id="output"></div>
+<div id="error" style="color: red;"></div>
+
+<script>
+  class Funcionario {
+    constructor(nome, idade, cargo) {
+      this.nome = nome;
+      this.idade = idade;
+      this.cargo = cargo;
+    }
+
+    seApresentar() {
+      return `Olá, meu nome é ${this.nome} e eu trabalho como ${this.cargo}.`;
+    }
+
+    trabalhar() {
+      return `${this.nome} está trabalhando em seu notebook.`;
+    }
+  }
+
+  class Gerente extends Funcionario {
+    constructor(nome, idade, departamento) {
+      super(nome, idade, 'Gerente');
+      this.departamento = departamento;
+    }
+
+    gerenciar() {
+      return `${this.nome} está gerenciando o departamento ${this.departamento}.`;
+    }
+  }
+
+  class Desenvolvedor extends Funcionario {
+    constructor(nome, idade, linguagem) {
+      super(nome, idade, 'Desenvolvedor');
+      this.linguagem = linguagem;
+    }
+
+    programar() {
+      return `${this.nome} está programando em ${this.linguagem}.`;
+    }
+  }
+
+  function exibirErro(mensagem) {
+    document.getElementById('error').textContent = mensagem;
+  }
+
+  document.getElementById('position').addEventListener('change', function() {
+    const departmentField = document.getElementById('department-field');
+    const languageField = document.getElementById('language-field');
+    if (this.value === 'Gerente') {
+      departmentField.style.display = 'block';
+      languageField.style.display = 'none';
+    } else if (this.value === 'Desenvolvedor') {
+      departmentField.style.display = 'none';
+      languageField.style.display = 'block';
+    }
+  });
+
+  document.getElementById('employee-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const nome = document.getElementById('name').value;
+    const idade = parseInt(document.getElementById('age').value);
+    const cargo = document.getElementById('position').value;
+    let funcionario;
+
+    try {
+      if (!nome || !idade || !cargo) {
+        throw new Error('Por favor, preencha todos os campos obrigatórios.');
+      }
+
+      if (cargo === 'Gerente') {
+        const departamento = document.getElementById('department').value;
+        if (!departamento) {
+          throw new Error('Por favor, preencha o campo "Departamento".');
+        }
+        funcionario = new Gerente(nome, idade, departamento);
+      } else if (cargo === 'Desenvolvedor') {
+        const linguagem = document.getElementById('programming-language').value;
+        if (!linguagem) {
+          throw new Error('Por favor, preencha o campo "Linguagem de Programação".');
+        }
+        funcionario = new Desenvolvedor(nome, idade, linguagem);
+      } else {
+        throw new Error('Cargo inválido.');
+      }
+
+      const output = document.getElementById('output');
+      output.innerHTML = `
+        <p>${funcionario.seApresentar()}</p>
+        <p>${funcionario.trabalhar()}</p>
+        ${funcionario instanceof Gerente ? `<p>${funcionario.gerenciar()}</p>` : ''}
+        ${funcionario instanceof Desenvolvedor ? `<p>${funcionario.programar()}</p>` : ''}
+      `;
+
+      exibirErro('');
+    } catch (error) {
+      exibirErro(error.message);
+    }
+  });
+</script>
+</body>
+</html>
